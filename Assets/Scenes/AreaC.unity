@@ -131,18 +131,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: AreaC
       objectReference: {fileID: 0}
-    - target: {fileID: 2402166733567514584, guid: c3974b1c33983244e8d48192704bb4fe, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 9.4
-      objectReference: {fileID: 0}
-    - target: {fileID: 2402166733567514584, guid: c3974b1c33983244e8d48192704bb4fe, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -13.9
-      objectReference: {fileID: 0}
-    - target: {fileID: 7232579655443995621, guid: c3974b1c33983244e8d48192704bb4fe, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 1.6
-      objectReference: {fileID: 0}
+    - target: {fileID: 8326334757664183503, guid: c3974b1c33983244e8d48192704bb4fe, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: bc26526ecb5214f43b8ef394e922a9c7, type: 2}
     - target: {fileID: 8849896969518566194, guid: c3974b1c33983244e8d48192704bb4fe, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
