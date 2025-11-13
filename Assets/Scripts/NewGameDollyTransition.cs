@@ -13,6 +13,7 @@ public class NewGameDollyTransition : MonoBehaviour
     public float fadeDuration = 1f;      
     public float travelSpeed = 100f;       
     public string nextSceneName = "GameStage1";
+    public float accelOffset = 0f;
 
     private bool isTransitioning = false;
 
@@ -47,19 +48,18 @@ public class NewGameDollyTransition : MonoBehaviour
         float fadeStartPos = pathLength * 0.5f; // khi đến 80% đường thì fade
         bool fadeStarted = false;
 
-        float elapsed = 0f;
-        float totalDuration = pathLength / travelSpeed; // tổng thời gian di chuyển dựa trên speed
-
+        float currentSpeed = 0f;
+        float maxSpeed = travelSpeed;
+        float accel = travelSpeed / accelOffset; // tốc độ tăng (tùy chỉnh)
+        dollyCart.m_Position = 0f;
 
         while (dollyCart.m_Position < endPos)
         {
-            elapsed += Time.deltaTime;
-            float tNorm = Mathf.Clamp01(elapsed / totalDuration);
+            // Tăng dần tốc độ
+            currentSpeed = Mathf.MoveTowards(currentSpeed, maxSpeed, accel * Time.deltaTime);
+            dollyCart.m_Position += currentSpeed * Time.deltaTime;
 
-            // Ease-in: tốc độ bắt đầu chậm, tăng dần
-            float easedT = Mathf.SmoothStep(0f, 2f, tNorm);
-
-            dollyCart.m_Position = Mathf.Lerp(startPos, endPos, easedT);
+            // Bắt đầu fade khi đến giữa đường
             if (!fadeStarted && dollyCart.m_Position >= fadeStartPos)
             {
                 fadeStarted = true;

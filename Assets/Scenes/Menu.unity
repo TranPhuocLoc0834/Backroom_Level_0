@@ -757,20 +757,20 @@ MonoBehaviour:
   m_Waypoints:
   - position: {x: 0, y: 0, z: -5}
     roll: 0
-  - position: {x: -0.6407677, y: 0.08573401, z: 16.436733}
-    roll: 60
-  - position: {x: -0.1205193, y: 0.17147923, z: 37.87495}
-    roll: 120
-  - position: {x: 0.3573879, y: 0.25722408, z: 59.313118}
-    roll: 180
-  - position: {x: 0.08924117, y: 0.34296167, z: 80.75032}
-    roll: 240
-  - position: {x: -0.235137, y: 0.42869872, z: 102.18745}
-    roll: 300
-  - position: {x: -0.23378515, y: 0.51443887, z: 123.62499}
-    roll: 360
-  - position: {x: -0.056319118, y: 0.60018075, z: 145.06277}
-    roll: 420
+  - position: {x: 0, y: 0.085738264, z: 16.4373}
+    roll: 0
+  - position: {x: 0, y: 0.17147923, z: 37.87495}
+    roll: 0
+  - position: {x: 0, y: 0.25722408, z: 59.313118}
+    roll: 0
+  - position: {x: 0, y: 0.34296167, z: 80.75032}
+    roll: 0
+  - position: {x: 0, y: 0.42869872, z: 102.18745}
+    roll: 0
+  - position: {x: 0, y: 0.51443887, z: 123.62499}
+    roll: 0
+  - position: {x: 0, y: 0.60018075, z: 145.06277}
+    roll: 0
 --- !u!4 &164383442
 Transform:
   m_ObjectHideFlags: 0
@@ -3505,8 +3505,8 @@ MonoBehaviour:
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 0}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 0.11764706}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.3137255}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 0}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -3871,8 +3871,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1142782057}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.0000059271115, y: 0.99999243, z: -0.0038030471, w: -0.00090460107}
-  m_LocalPosition: {x: 12.073337, y: 5.9090204, z: 81.82042}
+  m_LocalRotation: {x: 0.00008689156, y: 0.99997085, z: -0.0037985002, w: 0.006630608}
+  m_LocalPosition: {x: 11.854308, y: 5.9090047, z: 81.81589}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4154,8 +4154,8 @@ MonoBehaviour:
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 0}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 0.11764706}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.3137255}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 0}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -4903,8 +4903,8 @@ MonoBehaviour:
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 0}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 0.11764706}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.3137255}
+    m_SelectedColor: {r: 1, g: 1, b: 1, a: 0}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -5352,8 +5352,9 @@ MonoBehaviour:
   fadeImage: {fileID: 1297668241}
   dollyCart: {fileID: 1968094368}
   fadeDuration: 1
-  travelSpeed: 40
+  travelSpeed: 120
   nextSceneName: GameStage1
+  accelOffset: 2.5
 --- !u!4 &1529896756
 Transform:
   m_ObjectHideFlags: 0
@@ -6024,8 +6025,8 @@ MonoBehaviour:
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 0}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 0.11764706}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.3137255}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 0}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -6521,7 +6522,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1968094367}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.00012717803, y: 0.9997717, z: -0.0017498842, w: 0.021294612}
+  m_LocalRotation: {x: -0.0000012997049, y: 0.99999833, z: -0.0017483865, w: -0.00061283255}
   m_LocalPosition: {x: 11.860436, y: 5.9264884, z: 86.81586}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -7078,14 +7079,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2067601433}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.0020520666, y: 0.022199318, z: 0.000038683942, w: 0.9997515}
+  m_LocalRotation: {x: 0.0020501132, y: -0.0072432538, z: 0.00010211178, w: 0.9999717}
   m_LocalPosition: {x: 0, y: 0, z: 5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 79631760}
   m_Father: {fileID: 1968094369}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0.235, y: -0.83, z: 0.01}
 --- !u!114 &2067601436
 MonoBehaviour:
   m_ObjectHideFlags: 0
