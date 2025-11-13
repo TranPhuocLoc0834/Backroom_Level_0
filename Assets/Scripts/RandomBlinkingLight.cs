@@ -5,7 +5,9 @@ public class RandomBlinkingLight : MonoBehaviour
 {
     [Header("References")]
     public Light lightSource;          // Component Light
-    public Renderer bulbRenderer;      // Mesh Renderer (bóng đèn)
+    public Renderer bulbRenderer;  
+    public AudioSource audioSource;    // Âm thanh khi đèn nhấp nháy
+    public AudioClip flickerSound;    // Mesh Renderer (bóng đèn)
 
     [Header("Blink Settings")]
     public float minBlinkInterval = 0.05f;  // thời gian tối thiểu giữa các lần chớp
@@ -44,16 +46,17 @@ public class RandomBlinkingLight : MonoBehaviour
     IEnumerator RandomBlinkLoop()
     {
         while (true)
-        {
+        {   
+            yield return new WaitForSeconds(2f);
+            
             // --- Nhấp nháy một đợt ---
             int blinkCount = Random.Range(minBlinkCount, maxBlinkCount + 1);
             for (int i = 0; i < blinkCount; i++)
             {
                 isOn = !isOn;
                 lightSource.enabled = isOn;
-
                 UpdateBulbColor(isOn);
-
+                PlayFlickerSound();
                 float interval = Random.Range(minBlinkInterval, maxBlinkInterval);
                 yield return new WaitForSeconds(interval);
             }
@@ -75,5 +78,13 @@ public class RandomBlinkingLight : MonoBehaviour
         // Dành cho URP Lit: đổi Base Color và Emission
         bulbMat.SetColor("_BaseColor", targetColor);
         bulbMat.SetColor("_EmissionColor", targetColor * (state ? 3f : 0.2f)); // sáng mạnh hơn khi bật
+    }
+    void PlayFlickerSound()
+    {
+        if (audioSource != null && flickerSound != null)
+        {
+            audioSource.pitch = Random.Range(0.9f, 1.1f);
+            audioSource.PlayOneShot(flickerSound, Random.Range(0.6f, 1f)); // âm lượng ngẫu nhiên
+        }
     }
 }

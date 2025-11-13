@@ -4,7 +4,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using TMPro;
 
-public class GraphicsMenu : MonoBehaviour
+public class MenuManager: MonoBehaviour
 {
     [Header("Panels")]
     public GameObject optionsPanel;
@@ -12,6 +12,7 @@ public class GraphicsMenu : MonoBehaviour
     public GameObject graphicsPanel;
     public GameObject gameTitle;
     public GameObject subTitle;
+    public GameObject soundPanel;
     [Header("Resolution UI")]
     public TextMeshProUGUI resolutionText;
     public Button prevResButton;
@@ -75,7 +76,7 @@ public class GraphicsMenu : MonoBehaviour
         gameTitle.SetActive(true);
         subTitle.SetActive(true);
     }
-     public void OpenGraphicsSettings()
+    public void OpenGraphicsSettings()
     {
         optionsPanel.SetActive(false);
         graphicsPanel.SetActive(true);
@@ -84,6 +85,19 @@ public class GraphicsMenu : MonoBehaviour
     public void CloseGraphicsSettings()
     {
         graphicsPanel.SetActive(false);
+        optionsPanel.SetActive(true);
+        
+    }
+
+    public void OpenSoundSettings()
+    {
+        optionsPanel.SetActive(false);
+        soundPanel.SetActive(true);
+    }
+
+    public void CloseSoundSettings()
+    {
+        soundPanel.SetActive(false);
         optionsPanel.SetActive(true);
         
     }

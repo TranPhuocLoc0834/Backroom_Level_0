@@ -14,6 +14,10 @@ public class NewGameDollyTransition : MonoBehaviour
     public float travelSpeed = 100f;       
     public string nextSceneName = "GameStage1";
     public float accelOffset = 0f;
+    public AudioSource audioSource;    
+    public AudioClip airRushSound;  
+    public float fadeOutDuration = 2f;  
+    public GameObject ambientSound;
 
     private bool isTransitioning = false;
 
@@ -52,7 +56,7 @@ public class NewGameDollyTransition : MonoBehaviour
         float maxSpeed = travelSpeed;
         float accel = travelSpeed / accelOffset; // tốc độ tăng (tùy chỉnh)
         dollyCart.m_Position = 0f;
-
+        PlayAirRushSound();
         while (dollyCart.m_Position < endPos)
         {
             // Tăng dần tốc độ
@@ -74,8 +78,10 @@ public class NewGameDollyTransition : MonoBehaviour
         while (fadeImage.color.a < 1f)
             yield return null;
 
+        StartCoroutine(FadeOutAirRush());
+        ambientSound.SetActive(false);
         // 4. Load scene async (có delay nhỏ để camera render frame cuối)
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(2f);
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(nextSceneName);
         asyncLoad.allowSceneActivation = true;
     }
@@ -101,6 +107,35 @@ public class NewGameDollyTransition : MonoBehaviour
             yield return null;
         }
         img.color = new Color(0, 0, 0, to);
-        Debug.Log($"Alpha = {img.color.a}");
+    }
+    void PlayAirRushSound()
+    {
+        if (audioSource != null && airRushSound != null)
+        {
+            audioSource.clip = airRushSound;
+            audioSource.volume = 1f;      // bắt đầu full volume
+            audioSource.loop = true;       // loop trong suốt dolly
+            audioSource.Play();
+        }
+    }
+
+    // Coroutine fade out âm thanh
+    IEnumerator FadeOutAirRush()
+    {
+        if (audioSource != null)
+        {
+            float startVol = audioSource.volume;
+            float t = 0f;
+
+            while (t < fadeOutDuration)
+            {
+                t += Time.deltaTime;
+                audioSource.volume = Mathf.Lerp(startVol, 0f, t / fadeOutDuration);
+                yield return null;
+            }
+
+            audioSource.Stop();
+            audioSource.volume = startVol; // reset volume
+        }
     }
 }
