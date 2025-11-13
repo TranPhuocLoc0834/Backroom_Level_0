@@ -10,7 +10,7 @@ public class NewGameDollyTransition : MonoBehaviour
     public CanvasGroup uiGroup;            
     public Image fadeImage;                
     public CinemachineDollyCart dollyCart; 
-    public float fadeDuration = 1.2f;      
+    public float fadeDuration = 1f;      
     public float travelSpeed = 100f;       
     public string nextSceneName = "GameStage1";
 
@@ -44,7 +44,7 @@ public class NewGameDollyTransition : MonoBehaviour
         float startPos = 0f;
         float endPos = pathLength;
         dollyCart.m_Position = startPos;
-        float fadeStartPos = pathLength * 0.8f; // khi đến 80% đường thì fade
+        float fadeStartPos = pathLength * 0.5f; // khi đến 80% đường thì fade
         bool fadeStarted = false;
 
         float elapsed = 0f;
@@ -57,7 +57,7 @@ public class NewGameDollyTransition : MonoBehaviour
             float tNorm = Mathf.Clamp01(elapsed / totalDuration);
 
             // Ease-in: tốc độ bắt đầu chậm, tăng dần
-            float easedT = Mathf.SmoothStep(0f, 1f, tNorm);
+            float easedT = Mathf.SmoothStep(0f, 2f, tNorm);
 
             dollyCart.m_Position = Mathf.Lerp(startPos, endPos, easedT);
             if (!fadeStarted && dollyCart.m_Position >= fadeStartPos)
