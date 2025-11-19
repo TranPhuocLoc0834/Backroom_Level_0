@@ -12,7 +12,7 @@ public class NewGameDollyTransition : MonoBehaviour
     public CinemachineDollyCart dollyCart; 
     public float fadeDuration = 1f;      
     public float travelSpeed = 100f;       
-    public string nextSceneName = "GameStage1";
+    public string nextSceneName = "LoadingScene";
     public float accelOffset = 0f;
     public AudioSource audioSource;    
     public AudioClip airRushSound;  
