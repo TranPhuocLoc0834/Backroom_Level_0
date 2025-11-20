@@ -6,7 +6,6 @@ using UnityEngine.SceneManagement;
 public class LoadingBar : MonoBehaviour
 {
     public Image loadingBar;
-    public string sceneToLoad;
     public float minLoadingTime = 7f;   // ít nhất 5 giây
     public int minChunks = 7;
     public int maxChunks = 12;
@@ -64,6 +63,6 @@ public class LoadingBar : MonoBehaviour
             loadingBar.fillAmount = 1f;
 
         // load scene
-        SceneManager.LoadScene(sceneToLoad);
+        SceneManager.LoadScene(SceneLoader.sceneToLoad);
     }
 }

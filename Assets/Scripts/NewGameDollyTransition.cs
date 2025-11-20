@@ -82,6 +82,7 @@ public class NewGameDollyTransition : MonoBehaviour
         ambientSound.SetActive(false);
         // 4. Load scene async (có delay nhỏ để camera render frame cuối)
         yield return new WaitForSeconds(2f);
+        SceneLoader.sceneToLoad = "GameStage1";
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(nextSceneName);
         asyncLoad.allowSceneActivation = true;
     }
