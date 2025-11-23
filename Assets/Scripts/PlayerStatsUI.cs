@@ -5,9 +5,12 @@ public class PlayerStatsUI : MonoBehaviour
 {
     public static PlayerStatsUI Instance;
 
-    [Header("Player Bars")]
-    public Slider healthSlider;
-    public Slider staminaSlider;
+    public Image healthFill;
+    public Image staminaFill;
+
+    public float smoothSpeed = 3f;
+    private float healthTarget;
+    private float staminaTarget;
 
     void Awake()
     {
@@ -15,13 +18,22 @@ public class PlayerStatsUI : MonoBehaviour
         else Destroy(gameObject);
     }
 
+    void Update()
+    {
+        if (healthFill != null)
+            healthFill.fillAmount = Mathf.Lerp(healthFill.fillAmount, healthTarget, Time.deltaTime * smoothSpeed);
+
+        if (staminaFill != null)
+            staminaFill.fillAmount = Mathf.Lerp(staminaFill.fillAmount, staminaTarget, Time.deltaTime * smoothSpeed);
+    }
+
     public void UpdateHealthUI(float value)
     {
-        healthSlider.value = value; // value từ 0 -> 1
+        healthTarget = value;
     }
 
     public void UpdateStaminaUI(float value)
     {
-        staminaSlider.value = value;
+        staminaTarget = value;
     }
 }
