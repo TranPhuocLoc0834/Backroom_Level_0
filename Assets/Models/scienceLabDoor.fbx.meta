@@ -3,7 +3,42 @@ guid: 53df893ee66591e4d84b56061ef2f7c6
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Door
+    second: {fileID: 2100000, guid: b37690570ecc13643a5c6afba3656bee, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cardSwipe
+    second: {fileID: 2100000, guid: 766e24acd3ca65a4093e1b0edc358fa3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: doorFrame
+    second: {fileID: 2100000, guid: b7df6d39f4e64a244b4fa4040592b948, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: glass
+    second: {fileID: 2100000, guid: 1e61342329b1b3d458c5fe90e6c57e29, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: glassBorder
+    second: {fileID: 2100000, guid: a18613e5ddee3ca41a2d7c7670ce8871, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: handleBase
+    second: {fileID: 2100000, guid: 1d5a0a239ac9ecf4ea5d2079cf24e2db, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: keyPad
+    second: {fileID: 2100000, guid: 08c4f1a871d70ab438ecc8ec56bea780, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

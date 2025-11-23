@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a98f600f4abd9b4d98db42e2ad36c55, type: 3}
+  m_Name: ChainCutter
+  m_EditorClassIdentifier: Assembly-CSharp::Item
+  id: 002
+  displayName: Chain cutter
+  type: 1
+  localPositionOffset: {x: 0.15300007, y: -0.085999966, z: 0.11301966}
+  localRotationOffset: {x: 16.686869, y: 75.99775, z: 167.542}
+  description: May be it can cut some metal thing?
+  icon: {fileID: 21300000, guid: 9110442b204235d4b9057586b6e94d8c, type: 3}
+  stackable: 0
+  maxStack: 1
+  prefab: {fileID: 282468413055905145, guid: 4932c4533aafe5648b23f8fcdf5455b7, type: 3}

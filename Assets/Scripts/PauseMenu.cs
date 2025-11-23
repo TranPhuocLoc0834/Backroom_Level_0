@@ -1,12 +1,12 @@
+using StarterAssets;
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
-using StarterAssets;
 using UnityEngine.SceneManagement;
-using TMPro;
+using UnityEngine.UI;
 
-public class PauseManager: MonoBehaviour
+public class PauseManager : MonoBehaviour
 {
     [Header("Panels")]
     public GameObject pausePanel;
@@ -15,10 +15,10 @@ public class PauseManager: MonoBehaviour
     public GameObject optionsPanel;
 
     [Header("Player/Camera")]
-    public FirstPersonController playerController;  // gán PlayerController script
+    public FirstPersonController playerController; // gán PlayerController script
 
     [Header("Audio")]
-    public GameObject ambientSound;  // gán PlayerController script
+    public GameObject ambientSound; // gán PlayerController script
 
     [Header("Resolution UI")]
     public TextMeshProUGUI resolutionText;
@@ -36,6 +36,7 @@ public class PauseManager: MonoBehaviour
     public Toggle bloomToggle;
     public Toggle motionBlurToggle;
     public Button applyButton;
+
     [Header("Post Processing")]
     public Volume volume;
     public VolumeProfile volumeProfile;
@@ -49,13 +50,19 @@ public class PauseManager: MonoBehaviour
     private InputSystem_Actions input;
     private bool isPaused = false;
     public bool IsPaused => isPaused;
+    private GameObject previousPanel;
+    private GameObject currentPanel;
+
     void Awake()
     {
         input = new InputSystem_Actions();
         input.Player.Pause.performed += ctx => TogglePause();
     }
+
     void OnEnable() => input.Player.Enable();
+
     void OnDisable() => input.Player.Disable();
+
     void Start()
     {
         // Lấy effect
@@ -77,18 +84,52 @@ public class PauseManager: MonoBehaviour
         motionBlurToggle.isOn = PlayerPrefs.GetInt("MotionBlur", 1) == 1;
         vSyncToggle.isOn = PlayerPrefs.GetInt("VSync", 1) == 1;
     }
-    
+
     void TogglePause()
     {
-        if (isPaused) Resume();
-        else Pause();
+        if (!isPaused)
+        {
+            Pause();
+            return;
+        }
+
+        // Nếu đang ở pausePanel → resume
+        if (currentPanel == pausePanel)
+        {
+            Resume();
+            return;
+        }
+
+        // Nếu đang ở panel con → back đúng panel cha
+        BackOneLevel();
     }
+
+    void BackOneLevel()
+    {
+        // tắt current panel
+        currentPanel.SetActive(false);
+
+        // bật panel cha
+        previousPanel.SetActive(true);
+
+        // cập nhật lại currentPanel
+        currentPanel = previousPanel;
+
+        // cập nhật previousPanel mới
+        if (currentPanel == pausePanel)
+            previousPanel = null;
+        else
+            previousPanel = pausePanel; // mọi panel con đều có cha là options/pause
+    }
+
     void Pause()
     {
         isPaused = true;
         Time.timeScale = 0f;
         pausePanel.SetActive(true);
         ambientSound.SetActive(false);
+        currentPanel = pausePanel;
+        previousPanel = null;
         // Dừng FirstPersonController hoàn toàn
         if (playerController != null)
             playerController.enabled = !isPaused;
@@ -108,47 +149,53 @@ public class PauseManager: MonoBehaviour
         pausePanel.SetActive(false);
         if (playerController != null)
             playerController.enabled = true;
-        
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
         if (volume != null)
-            volume.enabled = true; 
+            volume.enabled = true;
+    }
+
+    void SetPanel(GameObject current, GameObject next)
+    {
+        previousPanel = current;
+        currentPanel = next;
+
+        current.SetActive(false);
+        next.SetActive(true);
     }
 
     public void OpenOptions()
     {
-        pausePanel.SetActive(false);
-        optionsPanel.SetActive(true);
+        SetPanel(pausePanel, optionsPanel);
     }
 
     public void CloseOptions()
     {
-        optionsPanel.SetActive(false);
-        pausePanel.SetActive(true);
+        previousPanel = null; // khi đóng thì quay về pausePanel
+        SetPanel(optionsPanel, pausePanel);
     }
+
     public void OpenGraphicsSettings()
     {
-        optionsPanel.SetActive(false);
-        graphicsPanel.SetActive(true);
+        SetPanel(optionsPanel, graphicsPanel);
     }
 
     public void CloseGraphicsSettings()
     {
-        graphicsPanel.SetActive(false);
-        optionsPanel.SetActive(true);
+        SetPanel(graphicsPanel, optionsPanel);
     }
 
     public void OpenSoundSettings()
     {
-        optionsPanel.SetActive(false);
-        soundPanel.SetActive(true);
+        SetPanel(optionsPanel, soundPanel);
     }
 
     public void CloseSoundSettings()
     {
-        soundPanel.SetActive(false);
-        optionsPanel.SetActive(true);
+        previousPanel = optionsPanel;
+        SetPanel(soundPanel, optionsPanel);
     }
 
     void UpdateResolutionText()
@@ -160,14 +207,16 @@ public class PauseManager: MonoBehaviour
     public void PreviousResolution()
     {
         currentResIndex--;
-        if (currentResIndex < 0) currentResIndex = resolutions.Length - 1;
+        if (currentResIndex < 0)
+            currentResIndex = resolutions.Length - 1;
         UpdateResolutionText();
     }
 
     public void NextResolution()
     {
         currentResIndex++;
-        if (currentResIndex >= resolutions.Length) currentResIndex = 0;
+        if (currentResIndex >= resolutions.Length)
+            currentResIndex = 0;
         UpdateResolutionText();
     }
 
@@ -177,17 +226,19 @@ public class PauseManager: MonoBehaviour
         textureText.text = textureOptions[currentTexIndex];
     }
 
-    public void PreviousTexture()
+    public void NextTexture()
     {
         currentTexIndex--;
-        if (currentTexIndex < 0) currentTexIndex = textureOptions.Length - 1;
+        if (currentTexIndex < 0)
+            currentTexIndex = textureOptions.Length - 1;
         UpdateTextureText();
     }
 
-    public void NextTexture()
+    public void PreviousTexture()
     {
         currentTexIndex++;
-        if (currentTexIndex >= textureOptions.Length) currentTexIndex = 0;
+        if (currentTexIndex >= textureOptions.Length)
+            currentTexIndex = 0;
         UpdateTextureText();
     }
 
@@ -196,7 +247,11 @@ public class PauseManager: MonoBehaviour
         // Áp dụng resolution + full screen
         Resolution res = resolutions[currentResIndex];
         bool isFullScreen = fullScreenToggle.isOn;
-        Screen.SetResolution(res.width, res.height, isFullScreen ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed);
+        Screen.SetResolution(
+            res.width,
+            res.height,
+            isFullScreen ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed
+        );
 
         // Áp dụng V-Sync
         QualitySettings.vSyncCount = vSyncToggle.isOn ? 1 : 0;
@@ -231,6 +286,7 @@ public class PauseManager: MonoBehaviour
 
         Debug.Log("Graphics settings applied!");
     }
+
     public void ReturnToMainMenu()
     {
         Time.timeScale = 1f;
