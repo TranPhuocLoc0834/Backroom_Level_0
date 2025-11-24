@@ -8,6 +8,7 @@ public class QuickSlotController : MonoBehaviour
     public Inventory inventory;
     public Transform handAnchor;
     public StarterAssetsInputs inputs;
+    public InventoryController inventoryController;
 
     [Header("Player Hand Mesh")]
     public GameObject handMesh;          // mesh bàn tay của nhân vật
@@ -24,6 +25,8 @@ public class QuickSlotController : MonoBehaviour
     // ===========================
     void Update()
     {
+        if (Time.timeScale == 0f || (inventoryController != null && inventoryController.IsOpen)) return;        // đang pause
+        //if (inventoryController && inventoryController.IsOpen) return;  
         if (inputs.quick1) UseQuickSlot(0);
         if (inputs.quick2) UseQuickSlot(1);
         if (inputs.quick3) UseQuickSlot(2);
@@ -34,7 +37,7 @@ public class QuickSlotController : MonoBehaviour
         inputs.quick1 = inputs.quick2 = inputs.quick3 = inputs.quick4 = inputs.quick5 = false;
     }
 
-     void UseQuickSlot(int index)
+    void UseQuickSlot(int index)
     {
         Debug.Log("Có nhấn phím: " + index);
         var slot = inventory.GetQuick(index);
@@ -65,8 +68,15 @@ public class QuickSlotController : MonoBehaviour
             inventory.Notify();
         }
     }
-    void UnequipItem()
+    public void OnInventoryOpen()
     {
+        // reset boolean flags
+        inputs.ResetQuickSlots();
+    }
+    
+    public void UnequipItem()
+    {
+        Debug.Log("UNEQUIP CALLED");
         if (currentEquipped)
             Destroy(currentEquipped);
 

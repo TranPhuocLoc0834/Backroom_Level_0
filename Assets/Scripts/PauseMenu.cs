@@ -1,6 +1,7 @@
 using StarterAssets;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
@@ -13,6 +14,9 @@ public class PauseManager : MonoBehaviour
     public GameObject graphicsPanel;
     public GameObject soundPanel;
     public GameObject optionsPanel;
+
+    [Header("Inventory")]
+    public InventoryController inventoryController; // gán trong inspector
 
     [Header("Player/Camera")]
     public FirstPersonController playerController; // gán PlayerController script
@@ -47,21 +51,31 @@ public class PauseManager : MonoBehaviour
     private int currentResIndex;
     private string[] textureOptions = { "HIGH", "MEDIUM", "LOW" };
     private int currentTexIndex;
-    private InputSystem_Actions input;
+
+    [Header("Input")]
+    public InputActionReference pauseAction;
+    
     private bool isPaused = false;
     public bool IsPaused => isPaused;
     private GameObject previousPanel;
     private GameObject currentPanel;
 
-    void Awake()
+    void OnEnable()
     {
-        input = new InputSystem_Actions();
-        input.Player.Pause.performed += ctx => TogglePause();
+        if (pauseAction != null)
+            pauseAction.action.performed += OnPausePerformed;
     }
 
-    void OnEnable() => input.Player.Enable();
+    void OnDisable()
+    {
+        if (pauseAction != null)
+            pauseAction.action.performed -= OnPausePerformed;
+    }
 
-    void OnDisable() => input.Player.Disable();
+    private void OnPausePerformed(InputAction.CallbackContext ctx)
+    {
+        OnEscPressed();
+    }
 
     void Start()
     {
@@ -85,23 +99,22 @@ public class PauseManager : MonoBehaviour
         vSyncToggle.isOn = PlayerPrefs.GetInt("VSync", 1) == 1;
     }
 
-    void TogglePause()
+    void OnEscPressed()
     {
+        // ESC ưu tiên đóng inventory
+        if (inventoryController != null && inventoryController.IsOpen)
+        {
+            inventoryController.CloseInventory();
+            return;
+        }
+
+        // Chưa pause → pause
         if (!isPaused)
-        {
             Pause();
-            return;
-        }
-
-        // Nếu đang ở pausePanel → resume
-        if (currentPanel == pausePanel)
-        {
+        else if (currentPanel == pausePanel)
             Resume();
-            return;
-        }
-
-        // Nếu đang ở panel con → back đúng panel cha
-        BackOneLevel();
+        else
+            BackOneLevel();
     }
 
     void BackOneLevel()
@@ -125,7 +138,9 @@ public class PauseManager : MonoBehaviour
     void Pause()
     {
         isPaused = true;
+        Debug.Log("isPaused" + isPaused);
         Time.timeScale = 0f;
+        inventoryController.DisableInventoryInput(); // <-- thêm dòng này
         pausePanel.SetActive(true);
         ambientSound.SetActive(false);
         currentPanel = pausePanel;
@@ -145,6 +160,7 @@ public class PauseManager : MonoBehaviour
     {
         isPaused = false;
         Time.timeScale = 1f;
+        inventoryController.EnableInventoryInput(); 
         ambientSound.SetActive(true);
         pausePanel.SetActive(false);
         if (playerController != null)

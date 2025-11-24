@@ -61,6 +61,11 @@ namespace StarterAssets
 		public void OnQuickSlot4(InputValue value) => quick4 = value.isPressed;
 		public void OnQuickSlot5(InputValue value) => quick5 = value.isPressed;
 		public void OnTurnFlashlightOn(InputValue value) => turnOnFlashlight = value.isPressed;
+		public void ResetQuickSlots()
+		{
+			quick1 = quick2 = quick3 = quick4 = quick5 = false;
+		}
+
 
 #endif
 

@@ -20,11 +20,18 @@ public class PlayerStatsUI : MonoBehaviour
 
     void Update()
     {
-        if (healthFill != null)
-            healthFill.fillAmount = Mathf.Lerp(healthFill.fillAmount, healthTarget, Time.deltaTime * smoothSpeed);
+        healthFill.fillAmount = Mathf.MoveTowards(
+            healthFill.fillAmount,
+            healthTarget,
+            Time.deltaTime * smoothSpeed
+        );
 
-        if (staminaFill != null)
-            staminaFill.fillAmount = Mathf.Lerp(staminaFill.fillAmount, staminaTarget, Time.deltaTime * smoothSpeed);
+        staminaFill.fillAmount = Mathf.MoveTowards(
+            staminaFill.fillAmount,
+            staminaTarget,
+            Time.deltaTime * smoothSpeed
+        );
+
     }
 
     public void UpdateHealthUI(float value)

@@ -15,7 +15,7 @@ public class PlayerStats : MonoBehaviour
     public float currentStamina;
 
     [Header("Stamina Settings")]
-    public float sprintConsumeRate = 20f;   // stamina mất mỗi giây khi chạy nhanh
+    public float sprintConsumeRate = 0f;   // stamina mất mỗi giây khi chạy nhanh
     public float regenRate = 15f;           // stamina hồi mỗi giây khi không chạy nhanh
     public bool isSprinting;
     public bool canSprint = true;
@@ -49,12 +49,12 @@ public class PlayerStats : MonoBehaviour
         if (isTryingToSprint && canSprint)
         {
             controller.SprintSpeed = controller.MoveSpeed * 2;
-            ConsumeStamina(20f * Time.deltaTime); // tốc độ tụt
+            ConsumeStamina(sprintConsumeRate * Time.deltaTime); // tốc độ tụt
         }
         else
         {
             controller.SprintSpeed = controller.MoveSpeed;
-            RestoreStamina(10f * Time.deltaTime); // tốc độ hồi
+            RestoreStamina(regenRate * Time.deltaTime); // tốc độ hồi
         }
     }
 
