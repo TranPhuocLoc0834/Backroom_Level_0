@@ -9,10 +9,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5420007285621930557}
-  - component: {fileID: 2852960928746574996}
   - component: {fileID: 8996087346432483854}
   - component: {fileID: 3606064105947582556}
-  m_Layer: 0
+  - component: {fileID: 2852960928746574996}
+  m_Layer: 6
   m_Name: InventorySlot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -40,22 +40,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 120, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &2852960928746574996
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3030018948404749841}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f312d2620c982f64b8359b462d16fffb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InventorySlot
-  icon: {fileID: 3651995621013058649}
-  amountText: {fileID: 4257273947715956386}
-  gridX: 0
-  gridY: 0
 --- !u!222 &8996087346432483854
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -94,6 +78,22 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &2852960928746574996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3030018948404749841}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f312d2620c982f64b8359b462d16fffb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InventorySlot
+  icon: {fileID: 3651995621013058649}
+  amountText: {fileID: 4257273947715956386}
+  gridX: 0
+  gridY: 0
 --- !u!1 &3070342274191822011
 GameObject:
   m_ObjectHideFlags: 0
@@ -105,7 +105,7 @@ GameObject:
   - component: {fileID: 7609125589499446395}
   - component: {fileID: 8018053194280990177}
   - component: {fileID: 3651995621013058649}
-  m_Layer: 5
+  m_Layer: 6
   m_Name: Icon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -180,7 +180,7 @@ GameObject:
   - component: {fileID: 8324044837807825336}
   - component: {fileID: 2973140528546281156}
   - component: {fileID: 4257273947715956386}
-  m_Layer: 5
+  m_Layer: 6
   m_Name: Amount
   m_TagString: Untagged
   m_Icon: {fileID: 0}

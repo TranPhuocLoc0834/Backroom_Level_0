@@ -104,6 +104,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "CloseContextMenu",
+                    "type": "Button",
+                    "id": "05cfa27d-9f1b-451c-af05-2d39b347c637",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -357,6 +366,17 @@
                     "processors": "",
                     "groups": ";KeyboardMouse",
                     "action": "TurnFlashlightOn",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "540d270e-299b-46f7-b004-336f5bd8eaf3",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";KeyboardMouse",
+                    "action": "CloseContextMenu",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

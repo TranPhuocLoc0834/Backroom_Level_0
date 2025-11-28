@@ -1,6 +1,6 @@
 using UnityEngine;
 using TMPro;
-using StarterAssets; // ← namespace đây!
+using StarterAssets;
 
 public class PlayerPickup : MonoBehaviour
 {
@@ -10,11 +10,11 @@ public class PlayerPickup : MonoBehaviour
     public Inventory inventory;
 
     public TextMeshProUGUI pickupText;
-    public StarterAssetsInputs input;   // kéo player vào
+    public StarterAssetsInputs input;
 
-    PickupItem current;
+    private PickupItem current;
 
-    void Update()
+    void LateUpdate()
     {
         Ray ray = new Ray(cam.transform.position, cam.transform.forward);
 
@@ -25,6 +25,7 @@ public class PlayerPickup : MonoBehaviour
             if (current == null)
             {
                 HidePickupUI();
+                input.interact = false;      // ← reset ở đây
                 return;
             }
 
@@ -32,36 +33,28 @@ public class PlayerPickup : MonoBehaviour
 
             if (input.interact)
             {
-                Debug.Log("Có nhấn E");
                 TryPickup();
-                input.interact = false; // reset để không spam
+                input.interact = false;      // ← reset khi dùng
             }
         }
         else
         {
             current = null;
             HidePickupUI();
+            input.interact = false;          // ← reset khi không trúng
         }
     }
 
     void TryPickup()
     {
         if (current == null) return;
-        Debug.Log("Có gọi hàm TryPickup");
+        Debug.Log("NHẬT LÚC NÀO: interact=" + input.interact);
         Pickup(current);
     }
 
     void Pickup(PickupItem p)
     {
-        int leftover;
-        
-        if (p.item.type == ItemType.KeyItem)
-        {
-            Debug.Log("Có pickup");
-            leftover = inventory.AddKeyItem(p.item, p.amount);
-        }
-        else
-            leftover = inventory.AddItem(p.item, p.amount);
+        int leftover = inventory.AddItem(p.item, p.amount);
 
         if (leftover <= 0)
             Destroy(p.gameObject);

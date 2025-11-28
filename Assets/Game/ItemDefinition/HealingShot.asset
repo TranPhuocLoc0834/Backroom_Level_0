@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a98f600f4abd9b4d98db42e2ad36c55, type: 3}
+  m_Name: HealingShot
+  m_EditorClassIdentifier: Assembly-CSharp::Item
+  id: 003
+  displayName: Healing Shot
+  type: 0
+  localPositionOffset: {x: 0, y: 0, z: 0}
+  localRotationOffset: {x: 0, y: 0, z: 0}
+  description: 
+  icon: {fileID: 21300000, guid: bbe128bbccc34bc46a3892313ed1049d, type: 3}
+  stackable: 1
+  maxStack: 5
+  prefab: {fileID: 8578494306180041705, guid: 6342b38fe9a53b44193cc89597715f4e, type: 3}

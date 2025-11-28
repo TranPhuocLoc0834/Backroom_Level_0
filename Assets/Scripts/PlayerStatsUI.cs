@@ -12,6 +12,10 @@ public class PlayerStatsUI : MonoBehaviour
     private float healthTarget;
     private float staminaTarget;
 
+    [Header("Buff UI")]
+    public TMPro.TextMeshProUGUI staminaBuffTimerText;
+    
+
     void Awake()
     {
         if (Instance == null) Instance = this;
@@ -31,7 +35,23 @@ public class PlayerStatsUI : MonoBehaviour
             staminaTarget,
             Time.deltaTime * smoothSpeed
         );
-
+        if (PlayerStats.Instance != null && PlayerStats.Instance.staminaBuffActive)
+        {
+            float t = PlayerStats.Instance.staminaBuffTimeLeft;
+            int m = Mathf.FloorToInt(t / 60f);
+            int s = Mathf.FloorToInt(t % 60f);
+            if (staminaBuffTimerText != null)
+            {
+                staminaBuffTimerText.text = $"{m}:{s:00}";
+                if (!staminaBuffTimerText.gameObject.activeSelf)
+                    staminaBuffTimerText.gameObject.SetActive(true);
+            }
+        }
+        else
+        {
+            if (staminaBuffTimerText != null && staminaBuffTimerText.gameObject.activeSelf)
+                staminaBuffTimerText.gameObject.SetActive(false);
+        }
     }
 
     public void UpdateHealthUI(float value)
@@ -43,4 +63,5 @@ public class PlayerStatsUI : MonoBehaviour
     {
         staminaTarget = value;
     }
+    
 }

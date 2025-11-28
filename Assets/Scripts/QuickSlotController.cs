@@ -10,23 +10,20 @@ public class QuickSlotController : MonoBehaviour
     public StarterAssetsInputs inputs;
     public InventoryController inventoryController;
 
-    [Header("Player Hand Mesh")]
-    public GameObject handMesh;          // mesh bàn tay của nhân vật
-
     private GameObject currentEquipped;  
+    private GameObject currentConsumableFX;
+    private Vector3 equipTargetPosition;
+    public float moveSpeed = 5f; // tốc độ nhô/lặn
 
     void Awake()
     {
         if (inventory == null)
             inventory = FindFirstObjectByType<Inventory>();
     }
-    // ===========================
-    // PROCESS
-    // ===========================
+
     void Update()
     {
         if (Time.timeScale == 0f || (inventoryController != null && inventoryController.IsOpen)) return;        // đang pause
-        //if (inventoryController && inventoryController.IsOpen) return;  
         if (inputs.quick1) UseQuickSlot(0);
         if (inputs.quick2) UseQuickSlot(1);
         if (inputs.quick3) UseQuickSlot(2);
@@ -35,55 +32,135 @@ public class QuickSlotController : MonoBehaviour
 
         // reset prevent spam
         inputs.quick1 = inputs.quick2 = inputs.quick3 = inputs.quick4 = inputs.quick5 = false;
+
+        // update vị trí nhô/lặn mượt
+        if (currentEquipped)
+        {
+            currentEquipped.transform.localPosition = Vector3.Lerp(
+                currentEquipped.transform.localPosition,
+                equipTargetPosition,
+                Time.deltaTime * moveSpeed
+            );
+        }
+        // kiểm tra consumable xong
+        if (currentConsumableFX == null && currentEquipped != null && !currentEquipped.activeSelf)
+        {
+            currentEquipped.SetActive(true);
+            currentEquipped.transform.localPosition = equipTargetPosition;
+        }
     }
 
     void UseQuickSlot(int index)
     {
         Debug.Log("Có nhấn phím: " + index);
         var slot = inventory.GetQuick(index);
-        if (slot.item == null || slot.IsEmpty)
+        if (slot == null || slot.item == null || slot.IsEmpty)
         {
-            Debug.Log("Bỏ trang bị");
+            Debug.Log("Bỏ trang bị / slot rỗng");
             UnequipItem();
             return;
         }
-            
+
         Item item = slot.item;
-
-        if (currentEquipped)
-            Destroy(currentEquipped);
-
-        if (item.prefab)
+       // Nếu đang cầm item non-consumable khác → nhô/lặn và destroy
+        if (item.type != ItemType.Consumable)
         {
-            GameObject obj = Instantiate(item.prefab, handAnchor); // spawn làm con của hand
-            obj.transform.localPosition = item.localPositionOffset;
-            obj.transform.localRotation = Quaternion.Euler(item.localRotationOffset);
-            currentEquipped = obj;
-            // tắt mesh tay nhân vật
-            if (handMesh) handMesh.SetActive(false);
+            // Nếu đang cầm item non-consumable khác → lặn + destroy
+            if (currentEquipped && item.prefab && !currentEquipped.name.StartsWith(item.prefab.name))
+            {
+                equipTargetPosition = currentEquipped.transform.localPosition - Vector3.up * 3f;
+                Destroy(currentEquipped);
+                currentEquipped = null;
+            }
+
+            // Nếu đang cầm đúng item → không làm gì
+            if (currentEquipped && currentEquipped.name.StartsWith(item.prefab.name))
+                return;
         }
+
+        // Consumable thì xử lý như trước
         if (item.type == ItemType.Consumable)
         {
+            GameObject fx = null;
+            if (item.prefab != null)
+            {
+                fx = Instantiate(item.prefab, handAnchor);
+                fx.transform.localPosition = item.localPositionOffset;
+                fx.transform.localRotation = Quaternion.Euler(item.localRotationOffset);
+                currentConsumableFX = fx;
+
+                ConsumableEffectRunner runner = fx.GetComponent<ConsumableEffectRunner>();
+                if (runner == null) runner = fx.AddComponent<ConsumableEffectRunner>();
+
+                if (item.id == "003")
+                {
+                    runner.isHeal = true;
+                    runner.isStamina = false;
+                }
+                else if (item.id == "004")
+                {
+                    runner.isHeal = false;
+                    runner.isStamina = true;
+                }
+            }
+            // Ẩn currentEquipped tạm thời
+            if (currentEquipped)
+                currentEquipped.SetActive(false);
+            
             slot.Remove(1);
             inventory.Notify();
+            return;
+        }
+
+        // Non-consumable: nhô lên 3 đơn vị từ offset chuẩn
+        if (item.prefab)
+        {
+            GameObject obj = Instantiate(item.prefab, handAnchor);
+            obj.transform.localPosition = item.localPositionOffset - Vector3.up * 3f; // bắt đầu 3 đơn vị dưới offset
+            obj.transform.localRotation = Quaternion.Euler(item.localRotationOffset);
+            currentEquipped = obj;
+
+            equipTargetPosition = item.localPositionOffset; // offset chuẩn là target
         }
     }
+
     public void OnInventoryOpen()
     {
-        // reset boolean flags
         inputs.ResetQuickSlots();
     }
-    
+
+    public void HideForInventory()
+    {
+        if (currentEquipped)
+            currentEquipped.SetActive(false);
+
+        if (currentConsumableFX)
+        {
+            foreach (var r in currentConsumableFX.GetComponentsInChildren<Renderer>(true))
+                r.enabled = false;
+        }
+    }
+
+    public void ShowAfterInventory()
+    {
+        if (currentEquipped)
+            currentEquipped.SetActive(true);
+
+        if (currentConsumableFX)
+        {
+            foreach (var r in currentConsumableFX.GetComponentsInChildren<Renderer>(true))
+                r.enabled = true;
+        }
+    }
+
     public void UnequipItem()
     {
         Debug.Log("UNEQUIP CALLED");
         if (currentEquipped)
-            Destroy(currentEquipped);
-
-        currentEquipped = null;
-
-        // bật lại mesh tay
-        if (handMesh) handMesh.SetActive(true);
+        {
+            equipTargetPosition = currentEquipped.transform.localPosition - Vector3.up * 3f;
+            Destroy(currentEquipped, 0.3f); // destroy sau khi lặn xuống
+            currentEquipped = null;
+        }
     }
 }
-

@@ -18,6 +18,8 @@ public class InventorySlot
     [HideInInspector]
     public int gridX,
         gridY;
+    public bool isQuickSlot = false;
+    public int quickIndex = -1;
     InventoryUI ui;
 
     void Awake()
@@ -37,17 +39,16 @@ public class InventorySlot
         icon.sprite = stack.item.icon;
         amountText.text = stack.item.stackable ? stack.amount.ToString() : "";
     }
-
-    // Simple click behaviour
+    //Simple click behaviour
     public void OnPointerClick(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            // TODO: pick up / place logic handled by InventoryUI
             ui.OnSlotLeftClick(this);
         }
         else if (eventData.button == PointerEventData.InputButton.Right)
         {
+            Debug.Log("Click slot: " + gridX + "," + gridY);
             ui.OnSlotRightClick(this);
         }
     }
@@ -55,6 +56,7 @@ public class InventorySlot
     // Drag handlers forward to UI manager (keeps slot lightweight)
     public void OnBeginDrag(PointerEventData eventData)
     {
+        Debug.Log("Có gọi đến on beingDrag");
         ui.OnBeginDrag(this, eventData);
     }
 

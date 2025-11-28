@@ -15,7 +15,7 @@ MonoBehaviour:
   id: 001
   displayName: Flashlight
   type: 1
-  localPositionOffset: {x: 0.112, y: -0.067, z: 0.183}
+  localPositionOffset: {x: 0.101, y: -0.093, z: 0.183}
   localRotationOffset: {x: -90, y: 0, z: 0}
   description: 
   icon: {fileID: 21300000, guid: 13ad0d817b041274b80b252de9c51e65, type: 3}

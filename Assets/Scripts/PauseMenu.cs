@@ -19,10 +19,8 @@ public class PauseManager : MonoBehaviour
     public InventoryController inventoryController; // gán trong inspector
 
     [Header("Player/Camera")]
-    public FirstPersonController playerController; // gán PlayerController script
-
-    [Header("Audio")]
-    public GameObject ambientSound; // gán PlayerController script
+    public FirstPersonController playerController;
+    public PlayerInput inputs; // gán PlayerController script
 
     [Header("Resolution UI")]
     public TextMeshProUGUI resolutionText;
@@ -140,12 +138,14 @@ public class PauseManager : MonoBehaviour
         isPaused = true;
         Debug.Log("isPaused" + isPaused);
         Time.timeScale = 0f;
+        AudioListener.pause = true;
         inventoryController.DisableInventoryInput(); // <-- thêm dòng này
         pausePanel.SetActive(true);
-        ambientSound.SetActive(false);
         currentPanel = pausePanel;
         previousPanel = null;
         // Dừng FirstPersonController hoàn toàn
+        if (inputs != null)
+            inputs.enabled = false;
         if (playerController != null)
             playerController.enabled = !isPaused;
         // Chuột
@@ -161,8 +161,10 @@ public class PauseManager : MonoBehaviour
         isPaused = false;
         Time.timeScale = 1f;
         inventoryController.EnableInventoryInput(); 
-        ambientSound.SetActive(true);
+        AudioListener.pause = false;
         pausePanel.SetActive(false);
+        if (inputs != null)
+            inputs.enabled = true;
         if (playerController != null)
             playerController.enabled = true;
 

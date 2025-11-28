@@ -1,10 +1,16 @@
 using UnityEngine;
 using StarterAssets;
+using System.Collections;
 
 public class PlayerStats : MonoBehaviour
 {
     public static PlayerStats Instance;
     private StarterAssetsInputs inputs;
+    [Header("Audio")]
+    public AudioSource breathingAudio;   // kéo file thở gấp vào đây
+    public AudioClip heavyBreathingClip; // clip thở gấp
+    private bool isBreathing = false;
+    
 
     [Header("Health")]
     public float maxHealth = 100f;
@@ -16,10 +22,17 @@ public class PlayerStats : MonoBehaviour
 
     [Header("Stamina Settings")]
     public float sprintConsumeRate = 0f;   // stamina mất mỗi giây khi chạy nhanh
-    public float regenRate = 15f;           // stamina hồi mỗi giây khi không chạy nhanh
+    public float regenRate = 15f;          // stamina hồi mỗi giây khi không chạy nhanh
     public bool isSprinting;
     public bool canSprint = true;
     public FirstPersonController controller;
+
+    [Header("Temporary Buffs")]
+    public float staminaConsumeMultiplier = 1f; // mặc định 1 = tiêu thụ bình thường
+    private Coroutine staminaBuffRoutine;
+
+    public float staminaBuffTimeLeft = 0f;
+    public bool staminaBuffActive = false;
 
     void Awake()
     {
@@ -32,74 +45,135 @@ public class PlayerStats : MonoBehaviour
         currentHealth = maxHealth;
         currentStamina = maxStamina;
 
-        inputs = GetComponent<StarterAssetsInputs>();
+        PlayerStatsUI.Instance.UpdateHealthUI(currentHealth / maxHealth);
+        PlayerStatsUI.Instance.UpdateStaminaUI(currentStamina / maxStamina);
 
+        inputs = GetComponent<StarterAssetsInputs>();
     }
+
     void Update()
     {
         bool isMoving = inputs.move.magnitude > 0.1f;
-        bool isSprintingKey = inputs.sprint;  // shift
+        bool isSprintingKey = inputs.sprint;  
         bool isTryingToSprint = isMoving && isSprintingKey;
 
-       // Nếu đang cố chạy nhưng hết stamina → tắt chạy luôn
+        // Không cho chạy nếu stamina dưới ngưỡng
         if (!canSprint)
             controller.SprintSpeed = controller.MoveSpeed;
 
-        // Nếu đang chạy nhanh
+        // Đang cố chạy nhanh và còn stamina
         if (isTryingToSprint && canSprint)
         {
             controller.SprintSpeed = controller.MoveSpeed * 2;
-            ConsumeStamina(sprintConsumeRate * Time.deltaTime); // tốc độ tụt
+            ConsumeStamina(sprintConsumeRate * staminaConsumeMultiplier * Time.deltaTime);
         }
         else
         {
             controller.SprintSpeed = controller.MoveSpeed;
-            RestoreStamina(regenRate * Time.deltaTime); // tốc độ hồi
+            RestoreStamina(regenRate * Time.deltaTime);
+        }
+        //===============================================
+        if (staminaBuffActive)
+        {
+            staminaBuffTimeLeft -= Time.deltaTime;
+            if (staminaBuffTimeLeft <= 0f)
+            {
+                staminaBuffTimeLeft = 0f;
+                staminaBuffActive = false;
+            }
         }
     }
 
-    // Hàm hồi máu
+    // ------------------------------
+    //  HỒI MÁU (dùng cho item consumable)
+    // ------------------------------
     public void Heal(float amount)
     {
+        if (amount <= 0) return;
+
         currentHealth += amount;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+
+        // Cập nhật UI mượt
         PlayerStatsUI.Instance.UpdateHealthUI(currentHealth / maxHealth);
     }
+    // ------------------------------
+    //  HỒI STAMINA (dùng cho item consumable)
+    // ------------------------------
 
-    // Hàm hồi stamina
     public void RestoreStamina(float amount)
     {
+        if (amount <= 0) return;
+
         currentStamina += amount;
         currentStamina = Mathf.Clamp(currentStamina, 0, maxStamina);
 
-        if (currentStamina > maxStamina * 0.2f)
-            canSprint = true; // có lại một ít thể lực -> cho chạy lại
+         if (currentStamina > maxStamina * 0.5f)
+        {
+            canSprint = true;
 
+            // ngừng thở gấp
+            if (isBreathing)
+                StopBreathing();
+        }
+
+        // Cập nhật UI mượt
         PlayerStatsUI.Instance.UpdateStaminaUI(currentStamina / maxStamina);
     }
-    // Hàm tiêu hao stamina
+
+    // ------------------------------
+    //  TIÊU HAO STAMINA (khi chạy)
+    // ------------------------------
     public void ConsumeStamina(float amount)
     {
         currentStamina -= amount;
         currentStamina = Mathf.Clamp(currentStamina, 0, maxStamina);
 
-        if (currentStamina <= 0)
-            canSprint = false; // hết thể lực -> không cho chạy
+        if (currentStamina <= 0f)
+        {
+            canSprint = false;
+
+            // bật thở gấp
+            if (!isBreathing)
+                PlayBreathing();
+        }
 
         PlayerStatsUI.Instance.UpdateStaminaUI(currentStamina / maxStamina);
     }
+    public void ApplyStaminaBuff(float duration, float multiplier)
+    {
+        // Nếu đang có buff cũ, hủy trước
+        if (staminaBuffRoutine != null)
+        StopCoroutine(staminaBuffRoutine);
 
-    // Hàm trừ máu khi bị damage
-    // public void TakeDamage(float amount)
-    // {
-    //     currentHealth -= amount;
-    //     currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
-    //     PlayerStatsUI.Instance.UpdateHealthUI(currentHealth / maxHealth);
+        staminaBuffTimeLeft = duration;   // thêm
+        staminaBuffActive = true;         // thêm
+        staminaBuffRoutine = StartCoroutine(StaminaBuffCoroutine(duration, multiplier));
+    }
 
-    //     if (currentHealth <= 0)
-    //     {
-    //         // Player die
-    //         Debug.Log("Player dead");
-    //     }
-    // }
+    private IEnumerator StaminaBuffCoroutine(float duration, float multiplier)
+    {
+        staminaConsumeMultiplier = multiplier;
+        yield return new WaitForSeconds(duration);
+        staminaConsumeMultiplier = 1f; // reset về bình thường
+        staminaBuffRoutine = null;
+    }
+    private void PlayBreathing()
+    {
+        if (breathingAudio == null || heavyBreathingClip == null) return;
+
+        breathingAudio.clip = heavyBreathingClip;
+        breathingAudio.loop = true;
+        breathingAudio.Play();
+
+        isBreathing = true;
+    }
+
+    private void StopBreathing()
+    {
+        if (breathingAudio == null) return;
+
+        breathingAudio.Stop();
+        isBreathing = false;
+    }
 }

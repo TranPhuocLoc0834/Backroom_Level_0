@@ -16,6 +16,11 @@ public class InventoryController : MonoBehaviour
     public float closeAngle = 0f;
     public float hingeSpeed = 6f;
 
+    [Header("Audio")]
+    public AudioSource audioSource;
+    public AudioClip openSound;
+    public AudioClip closeSound;
+
     private Coroutine hingeRoutine;
 
     [Header("Refs")]
@@ -75,10 +80,13 @@ public class InventoryController : MonoBehaviour
 
         if (isOpen)
         {
+            if (audioSource != null && openSound != null)
+            audioSource.PlayOneShot(openSound);
             
             if (quickSlot != null)
-                quickSlot.UnequipItem(); 
+                quickSlot.HideForInventory();
             // --- OPEN ---
+            StartHingeRotate(openAngle, null);
             inventoryPanel.SetActive(true);
             suitcaseRoot.SetActive(true);
             Time.timeScale = 0f;
@@ -87,23 +95,28 @@ public class InventoryController : MonoBehaviour
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
 
-            StartHingeRotate(openAngle, null);
+            
         }
         else
         {
+            if (audioSource != null && closeSound != null)
+            audioSource.PlayOneShot(closeSound);
+
+            
             // --- CLOSE ---
-            inventoryPanel.SetActive(false);
-
-            Time.timeScale = 1f;
-            if (controller) controller.enabled = true;
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-
             StartHingeRotate(closeAngle, () =>
             {
                 // Chỉ tắt khi xoay xong
                 suitcaseRoot.SetActive(false);
+                inventoryPanel.SetActive(false);
+                 if (quickSlot != null)
+                    quickSlot.ShowAfterInventory();
             });
+            Time.timeScale = 1f;
+            if (controller) controller.enabled = true;
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+            
         }
     }
 

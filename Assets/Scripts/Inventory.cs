@@ -46,92 +46,45 @@ public class Inventory : MonoBehaviour
     }
 
     // Try to add item into inventory; returns leftover amount not added
-    public int AddItem(Item item, int amount)
+     public int AddItem(Item item, int amount)
     {
         if (item == null || amount <= 0)
-            return amount;
+        return amount;
 
-        switch (item.type)
-        {
-            case ItemType.KeyItem:
-                return AddKeyItem(item, amount);
+        // KEY ITEM → auto vào quickslot
+        if (item.type == ItemType.KeyItem)
+            return AddToQuick(item, amount);
 
-            case ItemType.Consumable:
-                return AddConsumable(item, amount);
+        // CONSUMABLE → luôn vào inventory trước
+        if (item.type == ItemType.Consumable)
+            return AddToGrid(item, amount);
 
-            default:
-                // Những loại khác, ví dụ weapon, material → vào main grid
-                return AddConsumable(item, amount);
-        }
+        // Mặc định → vào inventory
+        return AddToGrid(item, amount);
     }
 
-    public int AddKeyItem(Item item, int amount)
+    private int AddToGrid(Item item, int amount)
     {
-        if (item == null || amount <= 0)
-            return amount;
-
-        // Ignore non-key items
-        if (item.type != ItemType.KeyItem)
-            return amount;
-
-        // Try merge into existing quick slots
+        // 1) Merge slot cũ
         if (item.stackable)
         {
-            for (int i = 0; i < quickSlots.Length; i++)
+            for (int i = 0; i < mainGrid.Length; i++)
             {
-                var s = quickSlots[i];
+                var s = mainGrid[i];
+
                 if (s.item == item && s.amount < item.maxStack)
                 {
                     amount = s.Add(amount);
                     if (amount <= 0)
                     {
-                        OnInventoryChanged?.Invoke();
+                        Notify();
                         return 0;
                     }
                 }
             }
         }
 
-        // Try place into empty quick slot
-        for (int i = 0; i < quickSlots.Length && amount > 0; i++)
-        {
-            if (quickSlots[i].IsEmpty)
-            {
-                int toPlace = item.stackable ? Mathf.Min(item.maxStack, amount) : 1;
-                quickSlots[i].item = item;
-                quickSlots[i].amount = toPlace;
-                amount -= toPlace;
-                OnInventoryChanged?.Invoke(); // <--- BẮT BUỘC
-            }
-        }
-
-        return amount; // leftover
-    }
-
-    public int AddConsumable(Item item, int amount)
-    {
-        if (item == null || amount <= 0)
-            return amount;
-
-        if (item.type != ItemType.Consumable)
-            return amount;
-
-        // Try merge
-        if (item.stackable)
-        {
-            for (int i = 0; i < mainGrid.Length; i++)
-            {
-                var s = mainGrid[i];
-                if (s.item == item && s.amount < item.maxStack)
-                {
-                    amount = s.Add(amount);
-                    if (amount <= 0)
-                        return 0;
-                }
-            }
-        }
-
-        // Try put into empty main slot
+        // 2) Gán vào slot trống
         for (int i = 0; i < mainGrid.Length && amount > 0; i++)
         {
             if (mainGrid[i].IsEmpty)
@@ -143,10 +96,49 @@ public class Inventory : MonoBehaviour
             }
         }
 
-        return amount;
+        Notify();
+        return amount; // leftover
+    }
+    private int AddToQuick(Item item, int amount)
+    {
+        if (item == null || amount <= 0)
+            return amount;
+
+        // 1) Merge slot cũ
+        if (item.stackable)
+        {
+            for (int i = 0; i < quickSlots.Length; i++)
+            {
+                var s = quickSlots[i];
+
+                if (s.item == item && s.amount < item.maxStack)
+                {
+                    amount = s.Add(amount);
+                    if (amount <= 0)
+                    {
+                        Notify();
+                        return 0;
+                    }
+                }
+            }
+        }
+
+        // 2) Đặt vào slot trống
+        for (int i = 0; i < quickSlots.Length && amount > 0; i++)
+        {
+            if (quickSlots[i].IsEmpty)
+            {
+                int toPlace = item.stackable ? Mathf.Min(item.maxStack, amount) : 1;
+                quickSlots[i].item = item;
+                quickSlots[i].amount = toPlace;
+                amount -= toPlace;
+                Notify();
+            }
+        }
+
+        return amount; // còn thừa (nếu đầy)
     }
 
-    // Move item between grid slots (handles swapping)
     public void MoveItemGrid(int fromX, int fromY, int toX, int toY)
     {
         if (fromX == toX && fromY == toY)
@@ -181,15 +173,50 @@ public class Inventory : MonoBehaviour
     {
         if (quickIndex < 0 || quickIndex >= QUICK)
             return;
+
         var src = GetSlot(sourceX, sourceY);
         if (src == null || src.IsEmpty)
             return;
 
-        // copy content (not reference) so grid and quick slot can diverge
+        // Quick slot chỉ giữ 1 item
         quickSlots[quickIndex].item = src.item;
-        quickSlots[quickIndex].amount = src.amount;
-    }
+        quickSlots[quickIndex].amount = 1;
 
+        Notify();
+    }
+    public void MoveStack(ItemStack from, ItemStack to)
+    {
+        if (from == null || from.IsEmpty) return;
+        if (to == null) return;
+
+        // 1) Nếu đích rỗng -> MOVE (copy -> clear source)
+        if (to.IsEmpty)
+        {
+            to.item = from.item;
+            to.amount = from.amount;
+            from.Clear();
+            Notify();
+            return;
+        }
+
+        // 2) Nếu cùng loại và stackable -> MERGE
+        if (!to.IsEmpty && from.item == to.item && from.item.stackable)
+        {
+            int leftover = to.Add(from.amount); // Add trả về lượng chưa được thêm
+            from.amount = leftover;
+            if (from.amount <= 0) from.Clear();
+            Notify();
+            return;
+        }
+
+        // 3) Khác loại -> SWAP
+        var tmp = to.Clone();       // lưu đích
+        to.item = from.item;
+        to.amount = from.amount;
+        from.item = tmp.item;       // gán lại từ tmp (đã lưu đích ban đầu)
+        from.amount = tmp.amount;
+        Notify();
+    }
     // Use quick slot
     // NHẤN 1–5 → Gọi hàm này
     public void UseQuickSlot(int index)
@@ -199,9 +226,11 @@ public class Inventory : MonoBehaviour
 
         var s = quickSlots[index];
         if (s.IsEmpty) return;
-        Item item = s.item;
-        // Nếu consumable → giảm 1
+
         s.Remove(1);
+        if (s.amount <= 0)
+            s.Clear();
+
         Notify();
     }
 }

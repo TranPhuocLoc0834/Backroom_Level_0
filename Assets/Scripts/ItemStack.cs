@@ -52,4 +52,9 @@ public class ItemStack
     {
         return new ItemStack(item, amount);
     }
+    public void Clear()
+    {
+        item = null;
+        amount = 0;
+    }
 }
