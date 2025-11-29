@@ -20,6 +20,9 @@ namespace StarterAssets
 		public bool quick5;
 		public bool turnOnFlashlight;
 		public bool closeContextMenu;
+		public bool openInventory;
+        public bool pauseGame;
+		public bool blockQuickInputs = false;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -56,15 +59,39 @@ namespace StarterAssets
 			interact = value.isPressed;
 		}
 		// >>> QuickSlot (chuẩn theo Equipment: 1,2,3,4,5)
-        public void OnQuickSlot1(InputValue value) => quick1 = value.isPressed;
-		public void OnQuickSlot2(InputValue value) => quick2 = value.isPressed;
-		public void OnQuickSlot3(InputValue value) => quick3 = value.isPressed;
-		public void OnQuickSlot4(InputValue value) => quick4 = value.isPressed;
-		public void OnQuickSlot5(InputValue value) => quick5 = value.isPressed;
+        public void OnQuickSlot1(InputValue value)
+        {
+			if (blockQuickInputs) return;
+            quick1 = value.isPressed;
+        } 
+		public void OnQuickSlot2(InputValue value){
+			if (blockQuickInputs) return;
+            quick2 = value.isPressed;
+        } 
+		public void OnQuickSlot3(InputValue value) {
+			if (blockQuickInputs) return;
+            quick3 = value.isPressed;
+        } 
+		public void OnQuickSlot4(InputValue value) {
+			if (blockQuickInputs) return;
+            quick4 = value.isPressed;
+        } 
+		public void OnQuickSlot5(InputValue value) {
+			if (blockQuickInputs) return;
+            quick5 = value.isPressed;
+        } 
 		public void OnTurnFlashlightOn(InputValue value) => turnOnFlashlight = value.isPressed;
 		public void OnCloseContextMenu(InputValue value)
         {
             closeContextMenu = value.isPressed;
+        }
+		 public void OnOpenInventory(InputValue value)
+        {
+            openInventory = value.isPressed;
+        }
+        public void OnPause(InputValue value)
+        {
+            pauseGame = value.isPressed;
         }
 		public void ResetQuickSlots()
 		{

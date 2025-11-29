@@ -19,8 +19,8 @@ public class PauseManager : MonoBehaviour
     public InventoryController inventoryController; // gán trong inspector
 
     [Header("Player/Camera")]
-    public FirstPersonController playerController;
-    public PlayerInput inputs; // gán PlayerController script
+    public StarterAssetsInputs inputs;
+    public PlayerInput playerInputs; // gán PlayerController script
 
     [Header("Resolution UI")]
     public TextMeshProUGUI resolutionText;
@@ -51,29 +51,11 @@ public class PauseManager : MonoBehaviour
     private int currentTexIndex;
 
     [Header("Input")]
-    public InputActionReference pauseAction;
     
     private bool isPaused = false;
     public bool IsPaused => isPaused;
     private GameObject previousPanel;
     private GameObject currentPanel;
-
-    void OnEnable()
-    {
-        if (pauseAction != null)
-            pauseAction.action.performed += OnPausePerformed;
-    }
-
-    void OnDisable()
-    {
-        if (pauseAction != null)
-            pauseAction.action.performed -= OnPausePerformed;
-    }
-
-    private void OnPausePerformed(InputAction.CallbackContext ctx)
-    {
-        OnEscPressed();
-    }
 
     void Start()
     {
@@ -96,7 +78,14 @@ public class PauseManager : MonoBehaviour
         motionBlurToggle.isOn = PlayerPrefs.GetInt("MotionBlur", 1) == 1;
         vSyncToggle.isOn = PlayerPrefs.GetInt("VSync", 1) == 1;
     }
-
+    void Update()
+    {
+        if (inputs.pauseGame)
+        {
+            inputs.pauseGame = false;
+            OnEscPressed();
+        }
+    }
     void OnEscPressed()
     {
         // ESC ưu tiên đóng inventory
@@ -127,27 +116,22 @@ public class PauseManager : MonoBehaviour
         currentPanel = previousPanel;
 
         // cập nhật previousPanel mới
-        if (currentPanel == pausePanel)
-            previousPanel = null;
-        else
-            previousPanel = pausePanel; // mọi panel con đều có cha là options/pause
+        previousPanel = currentPanel == pausePanel ? null : pausePanel;
     }
 
     void Pause()
     {
         isPaused = true;
-        Debug.Log("isPaused" + isPaused);
         Time.timeScale = 0f;
         AudioListener.pause = true;
-        inventoryController.DisableInventoryInput(); // <-- thêm dòng này
         pausePanel.SetActive(true);
         currentPanel = pausePanel;
         previousPanel = null;
         // Dừng FirstPersonController hoàn toàn
-        if (inputs != null)
-            inputs.enabled = false;
-        if (playerController != null)
-            playerController.enabled = !isPaused;
+        // if (playerInputs != null)
+        //     playerInputs.enabled = false;
+
+        playerInputs.SwitchCurrentActionMap("UI");
         // Chuột
         Cursor.lockState = isPaused ? CursorLockMode.None : CursorLockMode.Locked;
         Cursor.visible = isPaused;
@@ -160,13 +144,13 @@ public class PauseManager : MonoBehaviour
     {
         isPaused = false;
         Time.timeScale = 1f;
-        inventoryController.EnableInventoryInput(); 
         AudioListener.pause = false;
         pausePanel.SetActive(false);
-        if (inputs != null)
-            inputs.enabled = true;
-        if (playerController != null)
-            playerController.enabled = true;
+
+        // if (playerInputs != null)
+        //     playerInputs.enabled = true;
+
+        playerInputs.SwitchCurrentActionMap("Player");
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -308,6 +292,7 @@ public class PauseManager : MonoBehaviour
     public void ReturnToMainMenu()
     {
         Time.timeScale = 1f;
+        AudioListener.pause = false;
         SceneLoader.sceneToLoad = "MainMenu";
         SceneManager.LoadScene("LoadingScene");
     }

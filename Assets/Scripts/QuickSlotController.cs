@@ -1,3 +1,4 @@
+using System.Collections;
 using StarterAssets;
 using UnityEngine;
 using UnityEngine.InputSystem;   // dùng Starter Assets + New Input System
@@ -10,10 +11,12 @@ public class QuickSlotController : MonoBehaviour
     public StarterAssetsInputs inputs;
     public InventoryController inventoryController;
 
-    private GameObject currentEquipped;  
+    public GameObject currentEquipped;  
     private GameObject currentConsumableFX;
     private Vector3 equipTargetPosition;
     public float moveSpeed = 5f; // tốc độ nhô/lặn
+    private bool hiddenByInventory = false;
+    private bool hiddenByFX = false;
 
     void Awake()
     {
@@ -49,78 +52,86 @@ public class QuickSlotController : MonoBehaviour
             currentEquipped.transform.localPosition = equipTargetPosition;
         }
     }
+    public void UseConsumable(Item item, System.Action onFXComplete = null)
+    {
+        if (item == null || item.type != ItemType.Consumable) return;
 
+        HideForFX();
+
+        // Spawn FX
+        GameObject fx = null;
+        if (item.prefab != null)
+        {
+            fx = Instantiate(item.prefab, handAnchor);
+            fx.transform.localPosition = item.localPositionOffset;
+            fx.transform.localRotation = Quaternion.Euler(item.localRotationOffset);
+            currentConsumableFX = fx;
+
+            ConsumableEffectRunner runner = fx.GetComponent<ConsumableEffectRunner>();
+            if (runner == null) runner = fx.AddComponent<ConsumableEffectRunner>();
+
+            runner.isHeal = (item.id == "003");
+            runner.isStamina = (item.id == "004");
+
+            // Coroutine chờ FX xong rồi restore
+            StartCoroutine(WaitFXAndRestoreEquipped(fx, onFXComplete));
+        }
+        else
+        {
+            // Nếu không có prefab, gọi callback ngay
+            onFXComplete?.Invoke();
+            ShowAfterFX();
+        }
+    }
+
+    private IEnumerator WaitFXAndRestoreEquipped(GameObject fx, System.Action onFXComplete)
+    {
+        while (fx != null)
+            yield return null;
+
+        ShowAfterFX();
+        onFXComplete?.Invoke();
+    }
     void UseQuickSlot(int index)
     {
-        Debug.Log("Có nhấn phím: " + index);
         var slot = inventory.GetQuick(index);
         if (slot == null || slot.item == null || slot.IsEmpty)
         {
-            Debug.Log("Bỏ trang bị / slot rỗng");
             UnequipItem();
             return;
         }
 
         Item item = slot.item;
-       // Nếu đang cầm item non-consumable khác → nhô/lặn và destroy
-        if (item.type != ItemType.Consumable)
+
+        if (item.type == ItemType.Consumable)
         {
-            // Nếu đang cầm item non-consumable khác → lặn + destroy
-            if (currentEquipped && item.prefab && !currentEquipped.name.StartsWith(item.prefab.name))
+            // Gọi hàm chung
+            UseConsumable(item);
+
+            // Trừ item ngay
+            slot.Remove(1);
+            inventory.Notify();
+            return;
+        }
+
+        // Non-consumable: logic cũ
+        if (item.prefab)
+        {
+            if (currentEquipped && !currentEquipped.name.StartsWith(item.prefab.name))
             {
                 equipTargetPosition = currentEquipped.transform.localPosition - Vector3.up * 3f;
                 Destroy(currentEquipped);
                 currentEquipped = null;
             }
 
-            // Nếu đang cầm đúng item → không làm gì
             if (currentEquipped && currentEquipped.name.StartsWith(item.prefab.name))
                 return;
-        }
 
-        // Consumable thì xử lý như trước
-        if (item.type == ItemType.Consumable)
-        {
-            GameObject fx = null;
-            if (item.prefab != null)
-            {
-                fx = Instantiate(item.prefab, handAnchor);
-                fx.transform.localPosition = item.localPositionOffset;
-                fx.transform.localRotation = Quaternion.Euler(item.localRotationOffset);
-                currentConsumableFX = fx;
-
-                ConsumableEffectRunner runner = fx.GetComponent<ConsumableEffectRunner>();
-                if (runner == null) runner = fx.AddComponent<ConsumableEffectRunner>();
-
-                if (item.id == "003")
-                {
-                    runner.isHeal = true;
-                    runner.isStamina = false;
-                }
-                else if (item.id == "004")
-                {
-                    runner.isHeal = false;
-                    runner.isStamina = true;
-                }
-            }
-            // Ẩn currentEquipped tạm thời
-            if (currentEquipped)
-                currentEquipped.SetActive(false);
-            
-            slot.Remove(1);
-            inventory.Notify();
-            return;
-        }
-
-        // Non-consumable: nhô lên 3 đơn vị từ offset chuẩn
-        if (item.prefab)
-        {
             GameObject obj = Instantiate(item.prefab, handAnchor);
-            obj.transform.localPosition = item.localPositionOffset - Vector3.up * 3f; // bắt đầu 3 đơn vị dưới offset
+            obj.transform.localPosition = item.localPositionOffset - Vector3.up * 3f;
             obj.transform.localRotation = Quaternion.Euler(item.localRotationOffset);
             currentEquipped = obj;
-
-            equipTargetPosition = item.localPositionOffset; // offset chuẩn là target
+            equipTargetPosition = item.localPositionOffset;
         }
     }
 
@@ -131,9 +142,11 @@ public class QuickSlotController : MonoBehaviour
 
     public void HideForInventory()
     {
-        if (currentEquipped)
+        if (currentEquipped && !hiddenByInventory)
+        {
             currentEquipped.SetActive(false);
-
+        }
+            
         if (currentConsumableFX)
         {
             foreach (var r in currentConsumableFX.GetComponentsInChildren<Renderer>(true))
@@ -143,24 +156,64 @@ public class QuickSlotController : MonoBehaviour
 
     public void ShowAfterInventory()
     {
-        if (currentEquipped)
+        if (currentEquipped && hiddenByInventory && !hiddenByFX)
+        {
+            currentEquipped.transform.localPosition = equipTargetPosition - Vector3.up * 3f;
             currentEquipped.SetActive(true);
-
+        }
         if (currentConsumableFX)
         {
             foreach (var r in currentConsumableFX.GetComponentsInChildren<Renderer>(true))
                 r.enabled = true;
         }
     }
+    public void HideForFX()
+    {
+        if (currentEquipped && !hiddenByFX)
+        {
+            currentEquipped.SetActive(false);
+            hiddenByFX = true;
+        }
+    }
+
+    public void ShowAfterFX()
+    {
+        if (currentEquipped && hiddenByFX && !hiddenByInventory)
+        {
+            // đặt vị trí lặn trước
+            currentEquipped.transform.localPosition = equipTargetPosition - Vector3.up * 3f;
+            currentEquipped.SetActive(true);
+            hiddenByFX = false;
+        }
+    }
+
 
     public void UnequipItem()
     {
-        Debug.Log("UNEQUIP CALLED");
-        if (currentEquipped)
+        if (!currentEquipped) return;
+       // đặt vị trí mục tiêu lặn xuống
+        equipTargetPosition = currentEquipped.transform.localPosition - Vector3.up * 3f;
+
+        // Lưu object tạm để destroy sau khi lặn
+        GameObject toDestroy = currentEquipped;
+        currentEquipped = null;
+
+        // Coroutine chờ vài frame để lerp xong
+        StartCoroutine(DestroyAfterLerp(toDestroy, 0.3f)); 
+    }
+    private IEnumerator DestroyAfterLerp(GameObject obj, float delay)
+    {
+        float timer = 0f;
+        Vector3 startPos = obj.transform.localPosition;
+        Vector3 endPos = startPos - Vector3.up * 3f;
+
+        while (timer < delay)
         {
-            equipTargetPosition = currentEquipped.transform.localPosition - Vector3.up * 3f;
-            Destroy(currentEquipped, 0.3f); // destroy sau khi lặn xuống
-            currentEquipped = null;
+            timer += Time.unscaledDeltaTime; // dùng unscaled nếu timeScale = 0
+            obj.transform.localPosition = Vector3.Lerp(startPos, endPos, timer / delay);
+            yield return null;
         }
+
+        Destroy(obj);
     }
 }

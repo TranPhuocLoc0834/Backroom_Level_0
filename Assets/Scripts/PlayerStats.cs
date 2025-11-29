@@ -6,6 +6,7 @@ public class PlayerStats : MonoBehaviour
 {
     public static PlayerStats Instance;
     private StarterAssetsInputs inputs;
+    public StarterAssetsInputs Inputs => inputs;  
     [Header("Audio")]
     public AudioSource breathingAudio;   // kéo file thở gấp vào đây
     public AudioClip heavyBreathingClip; // clip thở gấp

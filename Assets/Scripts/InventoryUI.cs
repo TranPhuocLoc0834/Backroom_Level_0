@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -12,6 +13,7 @@ public class InventoryUI : MonoBehaviour
     public Transform gridParent; // should contain 6x6 layout
     public Transform quickParent; // 1x6
     private Canvas canvas;
+    public PlayerInput inputs;
 
     [Header("Right Click Menu")]
     public GameObject rightClickMenu;
@@ -24,7 +26,13 @@ public class InventoryUI : MonoBehaviour
     public float defaultStaminaBuffMultiplier = 0.5f;
     public string defaultAnimName = ""; // optional override for runner.animName
 
-    private InventorySlot selectedSlot;   // slot đang mở menu
+    [Header("Inspect Settings")]
+    public GameObject inspectPanel;         // Panel chế độ inspect
+    public Image inspectIcon;               // Image hiển thị icon item
+    public TextMeshProUGUI detailText;   
+
+
+    private InventorySlot selectedSlot;   
     public QuickSlotController quickCtrl; 
     public InventoryController inventoryController;
     InventorySlot draggingSlot = null;
@@ -70,6 +78,13 @@ public class InventoryUI : MonoBehaviour
 
     void Update()
     {
+         // Kiểm tra ESC để đóng inspect trước
+        if (inspectPanel.activeSelf && Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            CloseInspect();
+            return; // tránh trigger Pause sau đó
+        }
+
         if (rightClickMenu.activeSelf && Mouse.current.leftButton.wasPressedThisFrame)
         {
             if (!IsPointerOverContextMenu())
@@ -186,28 +201,29 @@ public class InventoryUI : MonoBehaviour
     }
     public void OnClickUse()
     {
-        Debug.Log("Có gọi OnclickUse");
-        if (selectedSlot == null) return;
+       if (selectedSlot == null) return;
 
-        ItemStack stack = selectedSlot.isQuickSlot
+        ItemStack s = selectedSlot.isQuickSlot
             ? inventory.GetQuick(selectedSlot.quickIndex)
             : inventory.GetSlot(selectedSlot.gridX, selectedSlot.gridY);
 
-        if (stack == null || stack.IsEmpty) return;
+        if (s == null || s.IsEmpty) return;
+        Item item = s.item;
 
-        Item item = stack.item;
-
-        if (item.type == ItemType.Consumable)
+        if (item.type == ItemType.Consumable && quickCtrl != null)
         {
-            // queue the item for later processing when inventory closes
-            pendingUses.Add(new PendingUse { itemId = item.id, prefab = item.prefab });
+            quickCtrl.UseConsumable(item, () =>
+            {
+                inventory.Notify();
+                RefreshAll();
+            });
 
-            // consume the item from inventory immediately
-            stack.Remove(1);
-            if (stack.amount <= 0) stack.Clear();
-
+            // Trừ item ngay
+            s.Remove(1);
+            if (s.amount <= 0) s.Clear();
             inventory.Notify();
             RefreshAll();
+
             rightClickMenu.SetActive(false);
         }
     }
@@ -271,6 +287,42 @@ public class InventoryUI : MonoBehaviour
         isProcessingQueue = false;
     }
 
+    public void OnClickDetail()
+    {
+        if (selectedSlot == null) return;
+
+        ItemStack s = selectedSlot.isQuickSlot
+            ? inventory.GetQuick(selectedSlot.quickIndex)
+            : inventory.GetSlot(selectedSlot.gridX, selectedSlot.gridY);
+
+        if (s == null || s.IsEmpty) return;
+
+        Item item = s.item;
+
+        // Bật panel
+        inspectPanel.SetActive(true);
+
+        if (inputs!=null)
+            inputs.enabled = false;
+        // Gán icon
+        if (inspectIcon != null)
+            inspectIcon.sprite = item.icon;
+
+        // Gán mô tả
+        if (detailText != null)
+            detailText.text = item.description;
+
+        rightClickMenu.SetActive(false);
+    }
+
+    public void CloseInspect()
+    {
+        inspectPanel.SetActive(false);
+        if (inputs!=null)
+            inputs.enabled = true;
+        if (inspectIcon != null)
+            inspectIcon.sprite = null; // reset icon
+    }
     public void OnClickRemove()
     {
         if (selectedSlot == null) return;
