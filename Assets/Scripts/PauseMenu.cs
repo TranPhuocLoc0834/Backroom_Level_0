@@ -15,9 +15,9 @@ public class PauseManager : MonoBehaviour
     public GameObject soundPanel;
     public GameObject optionsPanel;
 
-    [Header("Inventory")]
+    [Header("Inventory and NoteUI")]
     public InventoryController inventoryController; // gán trong inspector
-
+    public NoteUI Note;
     [Header("Player/Camera")]
     public StarterAssetsInputs inputs;
     public PlayerInput playerInputs; // gán PlayerController script
@@ -94,7 +94,11 @@ public class PauseManager : MonoBehaviour
             inventoryController.CloseInventory();
             return;
         }
-
+        if (Note!=null && Note.IsOpening)
+        {
+            Note.Hide();
+            return;
+        }
         // Chưa pause → pause
         if (!isPaused)
             Pause();

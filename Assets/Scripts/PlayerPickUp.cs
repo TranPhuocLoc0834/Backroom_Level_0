@@ -12,7 +12,8 @@ public class PlayerPickup : MonoBehaviour
     public TextMeshProUGUI pickupText;
     public StarterAssetsInputs input;
 
-    private PickupItem current;
+    private PickupItem currentItem;
+    private NoteInteractable currentNote;
 
     void LateUpdate()
     {
@@ -20,36 +21,53 @@ public class PlayerPickup : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hit, range, mask))
         {
-            current = hit.collider.GetComponent<PickupItem>();
+            // Ưu tiên pickupItem trước
+            currentItem = hit.collider.GetComponent<PickupItem>();
+            currentNote = hit.collider.GetComponent<NoteInteractable>();
 
-            if (current == null)
+            // ----------- Mảnh giấy ----------------
+            if (currentNote != null)
             {
-                HidePickupUI();
-                input.interact = false;      // ← reset ở đây
+                ShowPickupUI("[E] Đọc mảnh giấy");
+
+                if (input.interact)
+                {
+                    currentNote.Interact();
+                    input.interact = false;
+                }
                 return;
             }
 
-            ShowPickupUI($"[E] Pick up {current.item.displayName}");
-
-            if (input.interact)
+            // ----------- Item ---------------------
+            if (currentItem != null)
             {
-                TryPickup();
-                input.interact = false;      // ← reset khi dùng
+                ShowPickupUI($"[E] Pick up {currentItem.item.displayName}");
+
+                if (input.interact)
+                {
+                    TryPickup();
+                    input.interact = false;
+                }
+                return;
             }
+
+            // Không phải note cũng không phải item
+            HidePickupUI();
+            input.interact = false;
         }
         else
         {
-            current = null;
+            currentItem = null;
+            currentNote = null;
             HidePickupUI();
-            input.interact = false;          // ← reset khi không trúng
+            input.interact = false;
         }
     }
 
     void TryPickup()
     {
-        if (current == null) return;
-        Debug.Log("NHẬT LÚC NÀO: interact=" + input.interact);
-        Pickup(current);
+        if (currentItem == null) return;
+        Pickup(currentItem);
     }
 
     void Pickup(PickupItem p)

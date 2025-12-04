@@ -1,6 +1,5 @@
 // 3) Inventory.cs (core logic)
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Inventory : MonoBehaviour
