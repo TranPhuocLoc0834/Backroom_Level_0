@@ -47,11 +47,11 @@ public class InventoryController : MonoBehaviour
             return;
 
         // StarterAssetsInputs sẽ tự set openInventory = true khi nhấn phím
-        if (inputs.openInventory)
-        {
-            inputs.openInventory = false;
-            ToggleInventory();
-        }
+        // if (inputs.openInventory)
+        // {
+        //     inputs.openInventory = false;
+        //     ToggleInventory();
+        // }
     }
 
     public void CloseInventory()

@@ -88,6 +88,6 @@ public class PlayerPickup : MonoBehaviour
 
     void HidePickupUI()
     {
-        pickupText.gameObject.SetActive(false);
+        // pickupText.gameObject.SetActive(false);
     }
 }

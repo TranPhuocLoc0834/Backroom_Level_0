@@ -46,8 +46,8 @@ public class PlayerStats : MonoBehaviour
         currentHealth = maxHealth;
         currentStamina = maxStamina;
 
-        PlayerStatsUI.Instance.UpdateHealthUI(currentHealth / maxHealth);
-        PlayerStatsUI.Instance.UpdateStaminaUI(currentStamina / maxStamina);
+        // PlayerStatsUI.Instance.UpdateHealthUI(currentHealth / maxHealth);
+        // PlayerStatsUI.Instance.UpdateStaminaUI(currentStamina / maxStamina);
 
         inputs = GetComponent<StarterAssetsInputs>();
     }
@@ -119,7 +119,7 @@ public class PlayerStats : MonoBehaviour
         }
 
         // Cập nhật UI mượt
-        PlayerStatsUI.Instance.UpdateStaminaUI(currentStamina / maxStamina);
+        // PlayerStatsUI.Instance.UpdateStaminaUI(currentStamina / maxStamina);
     }
 
     // ------------------------------
